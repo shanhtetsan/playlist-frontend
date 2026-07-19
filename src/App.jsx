@@ -14,11 +14,23 @@ function App() {
         <Route path="/playlists/:id" element={<PlaylistDetail />} />
       </Routes>
 
-      {nowPlaying && (
-        <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: "#222", color: "#fff", padding: "10px" }}>
-          Now Playing: {nowPlaying.title} — {nowPlaying.artist} ({formatDuration(nowPlaying.duration)})
-        </div>
-      )}
+     {nowPlaying && (
+  <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: "#222", color: "#fff", padding: "10px" }}>
+    <p>Now Playing: {nowPlaying.title} — {nowPlaying.artist} ({formatDuration(nowPlaying.duration)})</p>
+    {nowPlaying.audioDbLoading && <p>Searching AudioDB...</p>}
+    {!nowPlaying.audioDbLoading && nowPlaying.audioDbMatch && (
+      <p>
+        Found on AudioDB: {nowPlaying.audioDbMatch.strTrack} by {nowPlaying.audioDbMatch.strArtist}
+        {nowPlaying.audioDbMatch.strTrackThumb && (
+          <img src={nowPlaying.audioDbMatch.strTrackThumb} alt="album art" width="50" />
+        )}
+      </p>
+    )}
+    {!nowPlaying.audioDbLoading && !nowPlaying.audioDbMatch && (
+      <p>No match found on AudioDB</p>
+    )}
+  </div>
+)}
     </div>
   );
 }

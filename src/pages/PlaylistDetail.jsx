@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import formatDuration from "../utils/formatDuration";
 import { useNowPlaying } from "../NowPlayingContext";
+import lookupTrack from "../utils/lookupTrack";
 
 function PlaylistDetail() {
   const { id } = useParams();
@@ -151,6 +152,16 @@ function PlaylistDetail() {
     }
   }
 
+async function handlePlaySong(song) {
+  setNowPlaying({ ...song, audioDbMatch: null, audioDbLoading: true });
+  try {
+    const match = await lookupTrack(song.artist, song.title);
+    setNowPlaying({ ...song, audioDbMatch: match, audioDbLoading: false });
+  } catch (err) {
+    setNowPlaying({ ...song, audioDbMatch: null, audioDbLoading: false });
+  }
+}
+
   if (loading) return <p>Loading playlist...</p>;
   if (error) return <p>Error: {error}</p>;
 
@@ -233,7 +244,7 @@ function PlaylistDetail() {
           ) : (
             <li key={song.id}>
               {song.title} — {song.artist} ({formatDuration(song.duration)})
-              <button onClick={() => setNowPlaying(song)}>▶ Play</button>
+              <button onClick={() => handlePlaySong(song)}>▶ Play</button>
               <button onClick={() => handleMoveSong(song.id, "up")}>↑</button>
               <button onClick={() => handleMoveSong(song.id, "down")}>↓</button>
               <button onClick={() => startEditingSong(song)}>Edit</button>
