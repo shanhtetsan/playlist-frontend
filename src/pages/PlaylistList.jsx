@@ -6,6 +6,9 @@ function PlaylistList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+
   useEffect(() => {
     async function fetchPlaylists() {
       try {
@@ -22,6 +25,24 @@ function PlaylistList() {
     fetchPlaylists();
   }, []);
 
+  async function handleCreatePlaylist(e) {
+    e.preventDefault();
+    try {
+      const res = await fetch("http://localhost:3000/playlists", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, description }),
+      });
+      if (!res.ok) throw new Error("Failed to create playlist");
+      const newPlaylist = await res.json();
+      setPlaylists([...playlists, newPlaylist]);
+      setName("");
+      setDescription("");
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
   if (loading) return <p>Loading playlists...</p>;
   if (error) return <p>Error: {error}</p>;
 
@@ -35,6 +56,23 @@ function PlaylistList() {
           </li>
         ))}
       </ul>
+
+      <h2>New Playlist</h2>
+      <form onSubmit={handleCreatePlaylist}>
+        <input
+          type="text"
+          placeholder="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+        <button type="submit">Create Playlist</button>
+      </form>
     </div>
   );
 }

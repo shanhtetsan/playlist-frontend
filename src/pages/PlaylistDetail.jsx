@@ -7,6 +7,10 @@ function PlaylistDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [title, setTitle] = useState("");
+  const [artist, setArtist] = useState("");
+  const [duration, setDuration] = useState("");
+
   useEffect(() => {
     async function fetchPlaylist() {
       try {
@@ -22,6 +26,25 @@ function PlaylistDetail() {
     }
     fetchPlaylist();
   }, [id]);
+
+  async function handleAddSong(e) {
+    e.preventDefault();
+    try {
+      const res = await fetch(`http://localhost:3000/playlists/${id}/songs`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, artist, duration: Number(duration) }),
+      });
+      if (!res.ok) throw new Error("Failed to add song");
+      const newSong = await res.json();
+      setPlaylist({ ...playlist, Songs: [...playlist.Songs, newSong] });
+      setTitle("");
+      setArtist("");
+      setDuration("");
+    } catch (err) {
+      setError(err.message);
+    }
+  }
 
   if (loading) return <p>Loading playlist...</p>;
   if (error) return <p>Error: {error}</p>;
@@ -39,6 +62,29 @@ function PlaylistDetail() {
           </li>
         ))}
       </ul>
+
+      <h2>Add a Song</h2>
+      <form onSubmit={handleAddSong}>
+        <input
+          type="text"
+          placeholder="Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Artist"
+          value={artist}
+          onChange={(e) => setArtist(e.target.value)}
+        />
+        <input
+          type="number"
+          placeholder="Duration (seconds)"
+          value={duration}
+          onChange={(e) => setDuration(e.target.value)}
+        />
+        <button type="submit">Add Song</button>
+      </form>
     </div>
   );
 }
