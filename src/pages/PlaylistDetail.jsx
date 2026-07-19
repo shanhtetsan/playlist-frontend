@@ -21,6 +21,9 @@ function PlaylistDetail() {
   const [editSongArtist, setEditSongArtist] = useState("");
   const [editSongDuration, setEditSongDuration] = useState("");
 
+  const [songSearch, setSongSearch] = useState("");
+  const [minDuration, setMinDuration] = useState("");
+
   useEffect(() => {
     async function fetchPlaylist() {
       try {
@@ -124,30 +127,38 @@ function PlaylistDetail() {
   }
 
   async function handleMoveSong(songId, direction) {
-  const currentIndex = playlist.Songs.findIndex((song) => song.id === songId);
-  const newIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+    const currentIndex = playlist.Songs.findIndex((song) => song.id === songId);
+    const newIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
 
-  if (newIndex < 0 || newIndex >= playlist.Songs.length) return; // out of bounds, do nothing
+    if (newIndex < 0 || newIndex >= playlist.Songs.length) return;
 
-  const reordered = [...playlist.Songs];
-  [reordered[currentIndex], reordered[newIndex]] = [reordered[newIndex], reordered[currentIndex]];
+    const reordered = [...playlist.Songs];
+    [reordered[currentIndex], reordered[newIndex]] = [reordered[newIndex], reordered[currentIndex]];
 
-  try {
-    const res = await fetch(`http://localhost:3000/playlists/${id}/songs/reorder`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ songIds: reordered.map((song) => song.id) }),
-    });
-    if (!res.ok) throw new Error("Failed to reorder songs");
-    const updatedSongs = await res.json();
-    setPlaylist({ ...playlist, Songs: updatedSongs });
-  } catch (err) {
-    setError(err.message);
+    try {
+      const res = await fetch(`http://localhost:3000/playlists/${id}/songs/reorder`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ songIds: reordered.map((song) => song.id) }),
+      });
+      if (!res.ok) throw new Error("Failed to reorder songs");
+      const updatedSongs = await res.json();
+      setPlaylist({ ...playlist, Songs: updatedSongs });
+    } catch (err) {
+      setError(err.message);
+    }
   }
-}
 
   if (loading) return <p>Loading playlist...</p>;
   if (error) return <p>Error: {error}</p>;
+
+  const filteredSongs = playlist.Songs.filter((song) => {
+    const matchesSearch =
+      song.title.toLowerCase().includes(songSearch.toLowerCase()) ||
+      song.artist.toLowerCase().includes(songSearch.toLowerCase());
+    const matchesDuration = minDuration === "" || song.duration >= Number(minDuration);
+    return matchesSearch && matchesDuration;
+  });
 
   return (
     <div>
@@ -170,14 +181,31 @@ function PlaylistDetail() {
         <>
           <h1>{playlist.name}</h1>
           <p>{playlist.description}</p>
-<p>Total duration: {formatDuration(playlist.Songs.reduce((sum, song) => sum + song.duration, 0))}</p>
+          <p>
+            Total duration:{" "}
+            {formatDuration(
+              playlist.Songs.reduce((sum, song) => sum + song.duration, 0)
+            )}
+          </p>
           <button onClick={() => setIsEditing(true)}>Edit Playlist</button>
         </>
       )}
 
       <h2>Songs</h2>
+      <input
+        type="text"
+        placeholder="Search songs..."
+        value={songSearch}
+        onChange={(e) => setSongSearch(e.target.value)}
+      />
+      <input
+        type="number"
+        placeholder="Min duration (seconds)"
+        value={minDuration}
+        onChange={(e) => setMinDuration(e.target.value)}
+      />
       <ul>
-        {playlist.Songs.map((song) =>
+        {filteredSongs.map((song) =>
           editingSongId === song.id ? (
             <li key={song.id}>
               <form onSubmit={(e) => handleUpdateSong(e, song.id)}>
@@ -201,13 +229,13 @@ function PlaylistDetail() {
               </form>
             </li>
           ) : (
-        <li key={song.id}>
-  {song.title} — {song.artist} ({formatDuration(song.duration)})
-  <button onClick={() => handleMoveSong(song.id, "up")}>↑</button>
-  <button onClick={() => handleMoveSong(song.id, "down")}>↓</button>
-  <button onClick={() => startEditingSong(song)}>Edit</button>
-  <button onClick={() => handleDeleteSong(song.id)}>Delete</button>
-</li>
+            <li key={song.id}>
+              {song.title} — {song.artist} ({formatDuration(song.duration)})
+              <button onClick={() => handleMoveSong(song.id, "up")}>↑</button>
+              <button onClick={() => handleMoveSong(song.id, "down")}>↓</button>
+              <button onClick={() => startEditingSong(song)}>Edit</button>
+              <button onClick={() => handleDeleteSong(song.id)}>Delete</button>
+            </li>
           )
         )}
       </ul>

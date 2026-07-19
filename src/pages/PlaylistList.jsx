@@ -9,6 +9,8 @@ function PlaylistList() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
+  const [search, setSearch] = useState("");
+
   useEffect(() => {
     async function fetchPlaylists() {
       try {
@@ -58,15 +60,27 @@ function PlaylistList() {
   if (loading) return <p>Loading playlists...</p>;
   if (error) return <p>Error: {error}</p>;
 
+  const filteredPlaylists = playlists.filter((playlist) =>
+    playlist.name.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <div>
       <h1>Playlists</h1>
+
+      <input
+        type="text"
+        placeholder="Search playlists..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+
       <ul>
-        {playlists.map((playlist) => (
+        {filteredPlaylists.map((playlist) => (
           <li key={playlist.id}>
-<Link to={`/playlists/${playlist.id}`}>
-  {playlist.name} ({playlist.songCount} {playlist.songCount === 1 ? "song" : "songs"})
-</Link>
+            <Link to={`/playlists/${playlist.id}`}>
+              {playlist.name} ({playlist.songCount} {playlist.songCount === 1 ? "song" : "songs"})
+            </Link>
             <button onClick={() => handleDeletePlaylist(playlist.id)}>Delete</button>
           </li>
         ))}
