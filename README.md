@@ -1,16 +1,41 @@
-# React + Vite
+# Playlist Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A React (Vite) client for creating playlists and managing songs. Pairs with [playlist-backend](https://github.com/shanhtetsan/playlist-backend).
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **React** — UI
+- **Vite** — dev server / build tool
+- **React Router** — client-side routing between the playlist list and detail pages
 
-## React Compiler
+## Setup
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+This app expects the backend to be running at `http://localhost:3000`. Start that first — see the [playlist-backend README](https://github.com/shanhtetsan/playlist-backend).
 
-## Expanding the ESLint configuration
+```bash
+npm install
+npm run dev
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Vite will print a local URL (usually `http://localhost:5173`, or the next open port if that one's taken).
+
+## Pages
+
+- **`/`** — list of all playlists, with a form to create a new one and a delete button on each
+- **`/playlists/:id`** — a single playlist's detail page: name, description (editable), its songs (deletable), and a form to add a new song
+
+## Features
+
+- Create a playlist
+- Edit a playlist's name/description
+- Delete a playlist (also removes its songs, server-side)
+- Add a song to a playlist
+- Delete a song
+- Loading and error states on every fetch
+- Client-side routing — navigating between pages doesn't reload the browser
+
+## Notes
+
+- All API calls point at `http://localhost:3000` directly in the fetch calls. If you deploy this or change the backend port, update those URLs.
+- The backend must have `cors` enabled for these requests to succeed across ports — this is already configured in `playlist-backend`.
+- State updates follow an "update after success" pattern: the UI only reflects a change once the server confirms it worked, never optimistically before the request completes.
