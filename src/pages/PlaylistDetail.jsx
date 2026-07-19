@@ -11,6 +11,10 @@ function PlaylistDetail() {
   const [artist, setArtist] = useState("");
   const [duration, setDuration] = useState("");
 
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+
   useEffect(() => {
     async function fetchPlaylist() {
       try {
@@ -18,6 +22,8 @@ function PlaylistDetail() {
         if (!res.ok) throw new Error("Failed to fetch playlist");
         const data = await res.json();
         setPlaylist(data);
+        setEditName(data.name);
+        setEditDescription(data.description);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -46,19 +52,72 @@ function PlaylistDetail() {
     }
   }
 
+  async function handleDeleteSong(songId) {
+    try {
+      const res = await fetch(`http://localhost:3000/songs/${songId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Failed to delete song");
+      setPlaylist({
+        ...playlist,
+        Songs: playlist.Songs.filter((song) => song.id !== songId),
+      });
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  async function handleUpdatePlaylist(e) {
+    e.preventDefault();
+    try {
+      const res = await fetch(`http://localhost:3000/playlists/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: editName, description: editDescription }),
+      });
+      if (!res.ok) throw new Error("Failed to update playlist");
+      const updated = await res.json();
+      setPlaylist({ ...playlist, name: updated.name, description: updated.description });
+      setIsEditing(false);
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
   if (loading) return <p>Loading playlist...</p>;
   if (error) return <p>Error: {error}</p>;
 
   return (
     <div>
-      <h1>{playlist.name}</h1>
-      <p>{playlist.description}</p>
+      {isEditing ? (
+        <form onSubmit={handleUpdatePlaylist}>
+          <input
+            type="text"
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+          />
+          <input
+            type="text"
+            value={editDescription}
+            onChange={(e) => setEditDescription(e.target.value)}
+          />
+          <button type="submit">Save</button>
+          <button type="button" onClick={() => setIsEditing(false)}>Cancel</button>
+        </form>
+      ) : (
+        <>
+          <h1>{playlist.name}</h1>
+          <p>{playlist.description}</p>
+          <button onClick={() => setIsEditing(true)}>Edit Playlist</button>
+        </>
+      )}
 
       <h2>Songs</h2>
       <ul>
         {playlist.Songs.map((song) => (
           <li key={song.id}>
             {song.title} — {song.artist} ({song.duration}s)
+            <button onClick={() => handleDeleteSong(song.id)}>Delete</button>
           </li>
         ))}
       </ul>

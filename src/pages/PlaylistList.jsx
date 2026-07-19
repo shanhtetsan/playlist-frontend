@@ -43,6 +43,18 @@ function PlaylistList() {
     }
   }
 
+  async function handleDeletePlaylist(playlistId) {
+    try {
+      const res = await fetch(`http://localhost:3000/playlists/${playlistId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Failed to delete playlist");
+      setPlaylists(playlists.filter((playlist) => playlist.id !== playlistId));
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
   if (loading) return <p>Loading playlists...</p>;
   if (error) return <p>Error: {error}</p>;
 
@@ -53,6 +65,7 @@ function PlaylistList() {
         {playlists.map((playlist) => (
           <li key={playlist.id}>
             <Link to={`/playlists/${playlist.id}`}>{playlist.name}</Link>
+            <button onClick={() => handleDeletePlaylist(playlist.id)}>Delete</button>
           </li>
         ))}
       </ul>
