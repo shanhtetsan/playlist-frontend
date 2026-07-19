@@ -4,6 +4,8 @@ import formatDuration from "../utils/formatDuration";
 import { useNowPlaying } from "../NowPlayingContext";
 import lookupTrack from "../utils/lookupTrack";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 function PlaylistDetail() {
   const { id } = useParams();
   const { setNowPlaying } = useNowPlaying();
@@ -30,7 +32,7 @@ function PlaylistDetail() {
   useEffect(() => {
     async function fetchPlaylist() {
       try {
-        const res = await fetch(`http://localhost:3000/playlists/${id}`);
+        const res = await fetch(`${API_URL}/${id}`);
         if (!res.ok) throw new Error("Failed to fetch playlist");
         const data = await res.json();
         setPlaylist(data);
@@ -48,7 +50,7 @@ function PlaylistDetail() {
   async function handleAddSong(e) {
     e.preventDefault();
     try {
-      const res = await fetch(`http://localhost:3000/playlists/${id}/songs`, {
+      const res = await fetch(`${API_URL}/${id}/songs`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, artist, duration: Number(duration) }),
@@ -66,7 +68,7 @@ function PlaylistDetail() {
 
   async function handleDeleteSong(songId) {
     try {
-      const res = await fetch(`http://localhost:3000/songs/${songId}`, {
+      const res = await fetch(`${API_URL}/songs/${songId}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("Failed to delete song");
@@ -82,7 +84,7 @@ function PlaylistDetail() {
   async function handleUpdatePlaylist(e) {
     e.preventDefault();
     try {
-      const res = await fetch(`http://localhost:3000/playlists/${id}`, {
+      const res = await fetch(`${API_URL}/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: editName, description: editDescription }),
@@ -106,7 +108,7 @@ function PlaylistDetail() {
   async function handleUpdateSong(e, songId) {
     e.preventDefault();
     try {
-      const res = await fetch(`http://localhost:3000/songs/${songId}`, {
+      const res = await fetch(`${API_URL}/songs/${songId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -139,7 +141,7 @@ function PlaylistDetail() {
     [reordered[currentIndex], reordered[newIndex]] = [reordered[newIndex], reordered[currentIndex]];
 
     try {
-      const res = await fetch(`http://localhost:3000/playlists/${id}/songs/reorder`, {
+      const res = await fetch(`${API_URL}/${id}/songs/reorder`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ songIds: reordered.map((song) => song.id) }),

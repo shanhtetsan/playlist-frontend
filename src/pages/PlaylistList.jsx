@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 function PlaylistList() {
   const [playlists, setPlaylists] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,7 +16,7 @@ function PlaylistList() {
   useEffect(() => {
     async function fetchPlaylists() {
       try {
-        const res = await fetch("http://localhost:3000/playlists");
+        const res = await fetch(`${API_URL}/playlists`);
         if (!res.ok) throw new Error("Failed to fetch playlists");
         const data = await res.json();
         setPlaylists(data);
@@ -30,7 +32,7 @@ function PlaylistList() {
   async function handleCreatePlaylist(e) {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:3000/playlists", {
+      const res = await fetch(`${API_URL}/playlists`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, description }),
@@ -47,7 +49,7 @@ function PlaylistList() {
 
   async function handleDeletePlaylist(playlistId) {
     try {
-      const res = await fetch(`http://localhost:3000/playlists/${playlistId}`, {
+      const res = await fetch(`${API_URL}/playlists/${playlistId}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("Failed to delete playlist");
