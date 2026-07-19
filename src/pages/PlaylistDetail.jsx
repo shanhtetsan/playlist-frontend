@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import formatDuration from "../utils/formatDuration";
 
 function PlaylistDetail() {
   const { id } = useParams();
@@ -116,7 +117,7 @@ function PlaylistDetail() {
       <ul>
         {playlist.Songs.map((song) => (
           <li key={song.id}>
-            {song.title} — {song.artist} ({song.duration}s)
+            {song.title} — {song.artist} ({formatDuration(song.duration)})
             <button onClick={() => handleDeleteSong(song.id)}>Delete</button>
           </li>
         ))}
