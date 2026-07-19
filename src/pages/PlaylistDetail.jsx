@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import formatDuration from "../utils/formatDuration";
+import { useNowPlaying } from "../NowPlayingContext";
 
 function PlaylistDetail() {
   const { id } = useParams();
+  const { setNowPlaying } = useNowPlaying();
   const [playlist, setPlaylist] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -231,6 +233,7 @@ function PlaylistDetail() {
           ) : (
             <li key={song.id}>
               {song.title} — {song.artist} ({formatDuration(song.duration)})
+              <button onClick={() => setNowPlaying(song)}>▶ Play</button>
               <button onClick={() => handleMoveSong(song.id, "up")}>↑</button>
               <button onClick={() => handleMoveSong(song.id, "down")}>↓</button>
               <button onClick={() => startEditingSong(song)}>Edit</button>
