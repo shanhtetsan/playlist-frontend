@@ -64,7 +64,9 @@ function PlaylistList() {
       <ul>
         {playlists.map((playlist) => (
           <li key={playlist.id}>
-            <Link to={`/playlists/${playlist.id}`}>{playlist.name}</Link>
+<Link to={`/playlists/${playlist.id}`}>
+  {playlist.name} ({playlist.songCount} {playlist.songCount === 1 ? "song" : "songs"})
+</Link>
             <button onClick={() => handleDeletePlaylist(playlist.id)}>Delete</button>
           </li>
         ))}
