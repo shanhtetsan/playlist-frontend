@@ -32,7 +32,7 @@ function PlaylistDetail() {
   useEffect(() => {
     async function fetchPlaylist() {
       try {
-        const res = await fetch(`${API_URL}/${id}`);
+        const res = await fetch(`${API_URL}/playlists/${id}`);
         if (!res.ok) throw new Error("Failed to fetch playlist");
         const data = await res.json();
         setPlaylist(data);
@@ -50,7 +50,7 @@ function PlaylistDetail() {
   async function handleAddSong(e) {
     e.preventDefault();
     try {
-      const res = await fetch(`${API_URL}/${id}/songs`, {
+      const res = await fetch(`${API_URL}/playlists/${id}/songs`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, artist, duration: Number(duration) }),
@@ -84,7 +84,7 @@ function PlaylistDetail() {
   async function handleUpdatePlaylist(e) {
     e.preventDefault();
     try {
-      const res = await fetch(`${API_URL}/${id}`, {
+      const res = await fetch(`${API_URL}/playlists/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: editName, description: editDescription }),
@@ -141,7 +141,7 @@ function PlaylistDetail() {
     [reordered[currentIndex], reordered[newIndex]] = [reordered[newIndex], reordered[currentIndex]];
 
     try {
-      const res = await fetch(`${API_URL}/${id}/songs/reorder`, {
+      const res = await fetch(`${API_URL}/playlists/${id}/songs/reorder`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ songIds: reordered.map((song) => song.id) }),
